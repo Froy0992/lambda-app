@@ -824,9 +824,14 @@ function showLogin(msg=''){
   <div class="fld"><label for="lg-u">Usuario</label><input id="lg-u" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
   <div class="fld"><label for="lg-p">Contraseña</label><input id="lg-p" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false"><label class="ck" style="font-size:13px;padding:2px 0"><input type="checkbox" id="lg-show">Mostrar contraseña</label></div>
   <div class="err" id="lg-e" role="alert">${esc(msg)}</div><button class="btn pri" type="submit">Entrar</button>
-  ${S.config.ejemplos?`<div class="hint-box">Usuarios de ejemplo para probar:<br><b>admin</b> / admin123 · administrador<br><b>socio1</b> / socio123 · socio<br><b>campo</b> / campo123 · solo evidencias<br><button type="button" class="link" id="lg-reset" style="margin-top:6px">¿No puedes entrar? Restablecer usuarios de ejemplo</button></div>`:''}</form>`;
+  ${S.config.ejemplos?`<div class="hint-box">Usuarios de ejemplo para probar:<br><b>admin</b> / admin123 · administrador<br><b>socio1</b> / socio123 · socio<br><b>campo</b> / campo123 · solo evidencias</div>`:''}
+  <button type="button" class="link" id="lg-reset" style="align-self:center;font-size:13px">¿Olvidaste la contraseña del administrador?</button>
+  <div id="lg-rbox" class="hint-box" hidden>Esto restablece la cuenta <b>admin</b> con la contraseña <b>admin123</b> en este dispositivo. Tus datos y los demás usuarios no se tocan.<br><button type="button" class="btn sm" id="lg-rok" style="margin-top:8px;width:auto">Restablecer admin</button></div></form>`;
   $('#lg-show').onchange=e=>{$('#lg-p').type=e.target.checked?'text':'password'};
-  const rs=$('#lg-reset');if(rs)rs.onclick=async()=>{S.usuarios=[];await ensureUsers();$('#lg-e').textContent='Listo: usuarios de ejemplo restablecidos. Entra con admin / admin123.';$('#lg-e').style.color='var(--ok)'};
+  $('#lg-reset').onclick=()=>{$('#lg-rbox').hidden=false};
+  $('#lg-rok').onclick=async()=>{let a=S.usuarios.find(z=>z.usuario==='admin');const fresh=await mkUser('Administrador','admin','admin123','admin',{temporal:true});
+    if(a){a.salt=fresh.salt;a.hash=fresh.hash;a.activo=true;a.temporal=true;a.rol='admin';a.permisos=[...ROLES.admin[2]]}else S.usuarios.unshift(fresh);
+    saveUsers();$('#lg-rbox').hidden=true;$('#lg-u').value='admin';$('#lg-p').value='';$('#lg-e').style.color='var(--ok)';$('#lg-e').textContent='Listo. Entra con admin / admin123 y luego cambia la contraseña.'};
   $('#loginForm').onsubmit=async e=>{e.preventDefault();const ok=await login($('#lg-u').value,$('#lg-p').value);if(!ok)$('#lg-e').textContent='Usuario o contraseña incorrectos, o el usuario no tiene acceso.'};
 }
 async function login(u,p){const x=S.usuarios.find(z=>z.usuario===String(u).trim().toLowerCase());if(!x||x.activo===false||await hashPw(p,x.salt)!==x.hash)return false;
