@@ -806,7 +806,7 @@ const ACT_PERM={newEq:'editar',editEq:'editar',newMt:'editar',newCt:'editar',edi
 const VIEW_PERM={finanzas:'finanzas',usuarios:'usuarios',config:'usuarios'};
 let U=null;
 const can=p=>!!(U&&U.activo!==false&&(U.permisos||[]).includes(p));
-async function hashPw(pw,salt){const txt=salt+'|'+pw;try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let h=2166136261;for(const ch of txt){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return 'f'+(h>>>0).toString(16)}}
+async function hashPw(pw,salt){const txt=salt+'|'+String(pw).trim();try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let h=2166136261;for(const ch of txt){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return 'f'+(h>>>0).toString(16)}}
 async function mkUser(nombre,usuario,pw,rol,extra={}){const salt=uid();return {id:uid(),nombre,usuario,salt,hash:await hashPw(pw,salt),rol,permisos:[...ROLES[rol][2]],activo:true,creado:new Date().toISOString(),...extra}}
 function saveUsers(){idbSet('usuarios',S.usuarios)}
 async function ensureUsers(){if(S.usuarios.length)return;S.usuarios=[await mkUser('Administrador','admin','admin123','admin',{temporal:true})];
@@ -821,10 +821,12 @@ function applyPerms(root){
 function showLogin(msg=''){
   closeModal();let el=$('#login');if(!el){el=document.createElement('div');el.id='login';document.body.appendChild(el)}el.hidden=false;
   el.innerHTML=`<form class="login-card" id="loginForm" novalidate><div class="lg-brand"><div class="logo-plate">${LOGO}</div><h1 class="sr">${esc(S.config.empresa)}</h1><p>Inicia sesión para continuar</p></div>
-  <div class="fld"><label for="lg-u">Usuario</label><input id="lg-u" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
-  <div class="fld"><label for="lg-p">Contraseña</label><input id="lg-p" type="password" autocomplete="current-password"></div>
+  <div class="fld"><label for="lg-u">Usuario</label><input id="lg-u" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+  <div class="fld"><label for="lg-p">Contraseña</label><input id="lg-p" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false"><label class="ck" style="font-size:13px;padding:2px 0"><input type="checkbox" id="lg-show">Mostrar contraseña</label></div>
   <div class="err" id="lg-e" role="alert">${esc(msg)}</div><button class="btn pri" type="submit">Entrar</button>
-  ${S.config.ejemplos?`<div class="hint-box">Usuarios de ejemplo para probar:<br><b>admin</b> / admin123 · administrador<br><b>socio1</b> / socio123 · socio<br><b>campo</b> / campo123 · solo evidencias</div>`:''}</form>`;
+  ${S.config.ejemplos?`<div class="hint-box">Usuarios de ejemplo para probar:<br><b>admin</b> / admin123 · administrador<br><b>socio1</b> / socio123 · socio<br><b>campo</b> / campo123 · solo evidencias<br><button type="button" class="link" id="lg-reset" style="margin-top:6px">¿No puedes entrar? Restablecer usuarios de ejemplo</button></div>`:''}</form>`;
+  $('#lg-show').onchange=e=>{$('#lg-p').type=e.target.checked?'text':'password'};
+  const rs=$('#lg-reset');if(rs)rs.onclick=async()=>{S.usuarios=[];await ensureUsers();$('#lg-e').textContent='Listo: usuarios de ejemplo restablecidos. Entra con admin / admin123.';$('#lg-e').style.color='var(--ok)'};
   $('#loginForm').onsubmit=async e=>{e.preventDefault();const ok=await login($('#lg-u').value,$('#lg-p').value);if(!ok)$('#lg-e').textContent='Usuario o contraseña incorrectos, o el usuario no tiene acceso.'};
 }
 async function login(u,p){const x=S.usuarios.find(z=>z.usuario===String(u).trim().toLowerCase());if(!x||x.activo===false||await hashPw(p,x.salt)!==x.hash)return false;
