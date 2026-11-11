@@ -9,3 +9,11 @@ App para controlar equipo topográfico, maquinaria, cómputo, contratos, persona
 ## Estado
 - Los datos y usuarios se guardan en cada dispositivo.
 - Siguiente fase: servidor para sincronizar entre dispositivos y usuarios.
+
+## Control de Obras (`/obras`)
+
+App separada para seguimiento de contratos de obra: avance físico vs. programado, estimaciones y su resumen (anticipo, amortización, IVA, saldo por estimar), convenios modificatorios, pendientes y acuerdos de minuta, bitácora con folio, evidencias con foto y GPS, y documentos (contratos, convenios, fianzas, planos).
+
+- Enlace (con GitHub Pages activo): https://froy0992.github.io/lambda-app/obras/
+- Funciona sin señal y se instala en el celular ("Agregar a pantalla de inicio").
+- Tiempo real: en **Ajustes → Sincronización** se conecta a un proyecto gratuito de Supabase. El código SQL para prepararlo viene en esa misma pantalla.
