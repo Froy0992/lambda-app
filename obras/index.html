@@ -1,5 +1,5 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><style>:root{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>LAMBDA Control de Obras</title>
+<title>Control de Obras</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#1d2228">
 <link rel="manifest" href="manifest.json">
@@ -8,9 +8,9 @@
 <style>
 /* Layout: barra lateral azul marino en escritorio, barra inferior en celular; tarjetas blancas sobre fondo gris azulado */
 :root{
-  /* Paleta LAMBDA: grafito ejecutivo + naranja del logo */
+  /* Paleta neutra: grafito + verde azulado discreto */
   --navy:#1d2228; --navy-2:#2c333c; --navy-fg:#eef0f2; --navy-muted:#a6adb6;
-  --teal:#e2711d; --accent:#b4540e; --ink2:#4a525c; --brand:#e8792a;
+  --teal:#2a7f7a; --accent:#1f6460; --ink2:#4a525c; --brand:#2a7f7a;
   --bg:#f1f2f4; --surface:#ffffff; --surface-2:#f6f7f8; --fg:#1b1f24; --muted:#5f6670; --line:#e1e3e7;
   --ok:#1d9a52; --warn:#c98a00; --bad:#d23f3f; --info:#2f74d0; --off:#7a8697;
   --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
@@ -20,12 +20,12 @@
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --navy:#14181d; --navy-2:#262c34; --bg:#0f1215; --surface:#181c21; --surface-2:#1f242a; --fg:#eceef1; --muted:#9aa2ad; --line:#2b3138;
-  --accent:#f39a55; --teal:#f0802f; --ink2:#7d8793; --ok:#3cc177; --warn:#e6ad2e; --bad:#ef6464; --info:#5b9be6; --off:#8b97a8; color-scheme:dark;
+  --accent:#5fc0b7; --teal:#4aa79f; --ink2:#7d8793; --ok:#3cc177; --warn:#e6ad2e; --bad:#ef6464; --info:#5b9be6; --off:#8b97a8; color-scheme:dark;
   --shadow:0 1px 2px rgba(0,0,0,.3);
 }}
 :root[data-theme="dark"]{
   --navy:#14181d; --navy-2:#262c34; --bg:#0f1215; --surface:#181c21; --surface-2:#1f242a; --fg:#eceef1; --muted:#9aa2ad; --line:#2b3138;
-  --accent:#f39a55; --teal:#f0802f; --ink2:#7d8793; --ok:#3cc177; --warn:#e6ad2e; --bad:#ef6464; --info:#5b9be6; --off:#8b97a8; color-scheme:dark;
+  --accent:#5fc0b7; --teal:#4aa79f; --ink2:#7d8793; --ok:#3cc177; --warn:#e6ad2e; --bad:#ef6464; --info:#5b9be6; --off:#8b97a8; color-scheme:dark;
   --shadow:0 1px 2px rgba(0,0,0,.3);
 }
 *{box-sizing:border-box}
@@ -43,10 +43,10 @@ a{color:var(--accent)}
 /* barra lateral */
 .side{width:232px;flex:none;background:var(--navy);color:var(--navy-fg);display:flex;flex-direction:column;position:sticky;top:env(safe-area-inset-top,0px);height:calc(100vh - env(safe-area-inset-top,0px));padding-left:env(safe-area-inset-left,0px)}
 .brand{padding:22px 18px 18px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;border-bottom:1px solid rgba(255,255,255,.08)}
-.logo-plate{background:#fff;border-radius:8px;padding:6px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-.logo-plate svg{display:block;width:150px;height:auto}
-.mtitle .logo-plate{padding:4px 8px;border-radius:7px;flex:none}
-.mtitle .logo-plate svg{width:84px}
+.logo-plate{color:var(--navy-fg);display:flex;align-items:center;justify-content:center}
+.logo-plate svg{display:block;width:40px;height:40px}
+.mtitle .logo-plate{flex:none;color:#fff}
+.mtitle .logo-plate svg{width:32px;height:32px}
 .lg-brand .logo-plate{box-shadow:none;padding:0}
 .lg-brand .logo-plate svg{width:200px}
 .brand b{font-family:var(--f-display);font-size:19px;font-weight:600;line-height:1.1}
@@ -327,7 +327,8 @@ fieldset.perms legend{font-size:12.5px;color:var(--muted);padding:0 4px}
   <aside class="side" aria-label="Menú principal">
     <div class="brand">
       <div class="logo-plate" data-logo></div>
-      <small style="margin-top:6px">Control de obras</small>
+      <b>Control de Obras</b>
+      <small>Infraestructura aeroportuaria</small>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="motto" id="motto">Contratos, avances y estimaciones en un solo lugar.</div>
@@ -377,7 +378,7 @@ const I={
   doc:'<path d="M8 3h8l4 4v14H8z"/><path d="M16 3v4h4M4 7v14h12"/>',
 };
 const ic=(n,extra='')=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${I[n]||''}</svg>`;
-const LOGO=`<svg viewBox="0 0 272 100" role="img" aria-label="LAMBDA"><rect x="3" y="3" width="266" height="94" rx="2" fill="#fff" stroke="#2b2d31" stroke-width="3"/><text x="112" y="66" text-anchor="end" font-family="'Public Sans',Arial,sans-serif" font-weight="700" font-size="36" fill="#3a3d42" letter-spacing="1">LAM</text><path d="M110 16 C121 10 130 14 135 26 L166 84 C169 90 175 91 180 85" fill="none" stroke="#e8792a" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M140 46 L115 88" fill="none" stroke="#e8792a" stroke-width="9" stroke-linecap="round"/><text x="170" y="66" font-family="'Public Sans',Arial,sans-serif" font-weight="700" font-size="36" fill="#3a3d42" letter-spacing="1">BDA</text></svg>`;
+const LOGO=`<svg viewBox="0 0 40 40" role="img" aria-label="Control de Obras"><rect x="1" y="1" width="38" height="38" rx="9" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-width="1.5"/><path d="M20 7.5c1 0 1.6.8 1.6 1.8v6.4l9.4 5.3v2.7l-9.4-3v5.9l2.9 2.3v2.1L20 29.8l-4.5 1.2v-2.1l2.9-2.3v-5.9l-9.4 3v-2.7l9.4-5.3V9.3c0-1 .6-1.8 1.6-1.8z" fill="currentColor"/></svg>`;
 document.querySelectorAll('[data-logo]').forEach(el=>el.innerHTML=LOGO);
 
 /* ---------- Utilidades ---------- */

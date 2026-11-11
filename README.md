@@ -12,7 +12,7 @@ App para controlar equipo topográfico, maquinaria, cómputo, contratos, persona
 
 ## Control de Obras (`/obras`)
 
-App separada para seguimiento de contratos de obra: avance físico vs. programado, estimaciones y su resumen (anticipo, amortización, IVA, saldo por estimar), convenios modificatorios, pendientes y acuerdos de minuta, bitácora con folio, evidencias con foto y GPS, y documentos (contratos, convenios, fianzas, planos).
+App separada, sin marca, para seguimiento de contratos de obra: avance físico vs. programado, estimaciones y su resumen (anticipo, amortización, IVA, saldo por estimar), convenios modificatorios, pendientes y acuerdos de minuta, bitácora con folio, evidencias con foto y GPS, y documentos (contratos, convenios, fianzas, planos).
 
 - Enlace (con GitHub Pages activo): https://froy0992.github.io/lambda-app/obras/
 - Funciona sin señal y se instala en el celular ("Agregar a pantalla de inicio").
