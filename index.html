@@ -343,7 +343,7 @@ const ic=(n,extra='')=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 /* ---------- Logo LAMBDA (redibujado en vector a partir del logo de la empresa) ---------- */
 const LOGO=`<svg viewBox="0 0 272 100" role="img" aria-label="LAMBDA"><rect x="3" y="3" width="266" height="94" rx="2" fill="#fff" stroke="#2b2d31" stroke-width="3"/><text x="112" y="66" text-anchor="end" font-family="'Public Sans',Arial,sans-serif" font-weight="700" font-size="36" fill="#3a3d42" letter-spacing="1">LAM</text><path d="M110 16 C121 10 130 14 135 26 L166 84 C169 90 175 91 180 85" fill="none" stroke="#e8792a" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M140 46 L115 88" fill="none" stroke="#e8792a" stroke-width="9" stroke-linecap="round"/><text x="170" y="66" font-family="'Public Sans',Arial,sans-serif" font-weight="700" font-size="36" fill="#3a3d42" letter-spacing="1">BDA</text></svg>`;
 document.querySelectorAll('[data-logo]').forEach(el=>el.innerHTML=LOGO);
-const APP_VER='11-nov-2026';
+const APP_VER='11-nov-2026 b';
 /* ---------- Utilidades ---------- */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -821,7 +821,8 @@ const rolPill=r=>{const x=ROLES[r]||['Usuario','off'];return `<span class="pill 
 const ACT_PERM={newEq:'editar',editEq:'editar',newMt:'editar',newCt:'editar',editCt:'editar',newTr:'editar',editTr:'editar',newMat:'editar',delEq:'borrar',delCt:'borrar',delTr:'borrar',delPhoto:'borrar',movEq:'movimientos',newEv:'evidencia',newEvRef:'evidencia',newFin:'finanzas',newFinRef:'finanzas',clearDemo:'usuarios',reseed:'usuarios',import:'usuarios',export:'usuarios',newUser:'usuarios'};
 const VIEW_PERM={finanzas:'finanzas',usuarios:'usuarios',config:'usuarios',contratos:'ver_contratos',trabajadores:'ver_personal',inventario:'ver_inventario',mantenimiento:'ver_inventario'};
 let U=null;
-const can=p=>!!(U&&U.activo!==false&&(U.permisos||[]).includes(p));
+const FIN_ROLES=['admin','socio'];
+const can=p=>!!(U&&U.activo!==false&&(U.permisos||[]).includes(p)&&(p!=='finanzas'||FIN_ROLES.includes(U.rol)));
 async function hashPw(pw,salt){const txt=salt+'|'+String(pw).trim();try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let h=2166136261;for(const ch of txt){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return 'f'+(h>>>0).toString(16)}}
 async function mkUser(nombre,usuario,pw,rol,extra={}){const salt=uid();return {id:uid(),nombre,usuario,salt,hash:await hashPw(pw,salt),rol,permisos:[...ROLES[rol][2]],contratos:[],v2:true,activo:true,creado:new Date().toISOString(),...extra}}
 function saveUsers(){idbSet('usuarios',S.usuarios)}
@@ -871,12 +872,13 @@ function userForm(x){
   <div class="fld"><label for="u-rol">Rol</label><select id="u-rol" ${self?'disabled':''}>${Object.entries(ROLES).map(([k,r])=>`<option value="${k}" ${x.rol===k?'selected':''}>${r[0]}</option>`).join('')}</select></div>
   <div class="fld full"><label for="u-trab">Es el trabajador (opcional)</label><select id="u-trab"><option value="">Ninguno</option>${S.trabajadores.map(t=>`<option value="${t.id}" ${x.trabajadorId===t.id?'selected':''}>${esc(t.nombre)}</option>`).join('')}</select></div>
   <fieldset class="fld full perms"><legend>Contratos asignados</legend><div class="hint" style="margin-bottom:4px">Quien no tiene "Ver todos los contratos" solo ve estos contratos y su equipo, personal y evidencias.</div>${S.contratos.map(c=>`<label class="ck"><input type="checkbox" name="ctr" value="${c.id}" ${(x.contratos||[]).includes(c.id)?'checked':''}>${esc(c.numero)} · ${esc(c.proyecto)}</label>`).join('')||'<div class="hint">Aún no hay contratos.</div>'}</fieldset>
-  <fieldset class="fld full perms"><legend>Permisos</legend>${PERMS.map(([k,l])=>`<label class="ck"><input type="checkbox" name="perm" value="${k}" ${(x.permisos||[]).includes(k)?'checked':''} ${self&&(k==='usuarios'||VIEWP.includes(k))?'disabled':''}>${l}</label>`).join('')}</fieldset>
+  <fieldset class="fld full perms"><legend>Permisos</legend>${PERMS.map(([k,l])=>`<label class="ck"><input type="checkbox" name="perm" value="${k}" ${(x.permisos||[]).includes(k)?'checked':''} ${self&&(k==='usuarios'||VIEWP.includes(k))?'disabled':''} ${k==='finanzas'?'data-fin="1"':''}>${l}${k==='finanzas'?' <span class="hint">(solo administrador y socios)</span>':''}</label>`).join('')}</fieldset>
   <label class="ck fld full"><input type="checkbox" id="u-activo" ${x.activo!==false?'checked':''} ${self?'disabled':''}>Puede entrar a la app</label>
   ${isNew?'':'<div class="fld full hint">Si cambias la contraseña, el usuario verá un aviso para poner una propia.</div>'}
   <div class="fld full" id="uErr" style="color:var(--bad)" hidden></div></div>
   <div class="mf">${!isNew&&!self?'<button type="button" class="btn danger" id="uDel" style="margin-right:auto">Eliminar</button>':''}<button type="button" class="btn" data-close="1">Cancelar</button><button type="submit" class="btn pri">Guardar</button></div></form></div>`;
-  $('#u-rol').onchange=e=>{const p=ROLES[e.target.value][2];document.querySelectorAll('#ufrm [name=perm]').forEach(c=>{if(!c.disabled)c.checked=p.includes(c.value)})};
+  const finLock=()=>{const r=$('#u-rol').value,c=$('#ufrm [data-fin]');if(!c)return;const ok=FIN_ROLES.includes(r);c.disabled=!ok;if(!ok)c.checked=false};
+  $('#u-rol').onchange=e=>{const p=ROLES[e.target.value][2];document.querySelectorAll('#ufrm [name=perm]').forEach(c=>{if(!c.disabled||c.dataset.fin)c.checked=p.includes(c.value)});finLock()};finLock();
   const err=m=>{const e=$('#uErr');e.hidden=false;e.textContent=m};
   $('#ufrm').onsubmit=async ev=>{ev.preventDefault();const nombre=$('#u-nombre').value.trim(),usuario=$('#u-usuario').value.trim().toLowerCase(),pw=$('#u-pw').value;
     if(!nombre||!usuario)return err('Escribe el nombre y el usuario.');
@@ -884,7 +886,7 @@ function userForm(x){
     if(S.usuarios.some(z=>z.usuario===usuario&&z.id!==x.id))return err('Ese usuario ya existe. Elige otro.');
     if((isNew||pw)&&pw.length<6)return err('La contraseña debe tener al menos 6 caracteres.');
     const o={...x,nombre,usuario,rol:self?x.rol:$('#u-rol').value,trabajadorId:$('#u-trab').value||null,permisos:[...document.querySelectorAll('#ufrm [name=perm]:checked')].map(c=>c.value),contratos:[...document.querySelectorAll('#ufrm [name=ctr]:checked')].map(c=>c.value),activo:self?true:$('#u-activo').checked};
-    if(self)['usuarios',...VIEWP].forEach(k=>{if(!o.permisos.includes(k))o.permisos.push(k)});
+    if(!FIN_ROLES.includes(o.rol))o.permisos=o.permisos.filter(k=>k!=='finanzas');if(self)['usuarios',...VIEWP].forEach(k=>{if(!o.permisos.includes(k))o.permisos.push(k)});
     if(pw){o.salt=uid();o.hash=await hashPw(pw,o.salt);o.temporal=!self}
     if(isNew){o.id=uid();o.creado=new Date().toISOString();S.usuarios.push(o)}else S.usuarios[S.usuarios.findIndex(z=>z.id===o.id)]=o;
     saveUsers();if(self)U=o;closeModal();render();toast(isNew?'Usuario creado':'Usuario guardado')};
