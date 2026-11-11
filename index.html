@@ -343,6 +343,7 @@ const ic=(n,extra='')=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 /* ---------- Logo LAMBDA (redibujado en vector a partir del logo de la empresa) ---------- */
 const LOGO=`<svg viewBox="0 0 272 100" role="img" aria-label="LAMBDA"><rect x="3" y="3" width="266" height="94" rx="2" fill="#fff" stroke="#2b2d31" stroke-width="3"/><text x="112" y="66" text-anchor="end" font-family="'Public Sans',Arial,sans-serif" font-weight="700" font-size="36" fill="#3a3d42" letter-spacing="1">LAM</text><path d="M110 16 C121 10 130 14 135 26 L166 84 C169 90 175 91 180 85" fill="none" stroke="#e8792a" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M140 46 L115 88" fill="none" stroke="#e8792a" stroke-width="9" stroke-linecap="round"/><text x="170" y="66" font-family="'Public Sans',Arial,sans-serif" font-weight="700" font-size="36" fill="#3a3d42" letter-spacing="1">BDA</text></svg>`;
 document.querySelectorAll('[data-logo]').forEach(el=>el.innerHTML=LOGO);
+const APP_VER='11-nov-2026';
 /* ---------- Utilidades ---------- */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -893,7 +894,7 @@ function accountSheet(){
   $('#modalRoot').innerHTML=`<div class="ov" data-close="1"><div class="modal" style="max-width:440px"><div class="mh"><h2>Mi cuenta</h2><button class="x" data-close="1" aria-label="Cerrar">${ic('close')}</button></div><div class="mb" style="grid-template-columns:1fr">
   <div class="row"><div class="avatar">${initials(U.nombre)}</div><div><b>${esc(U.nombre)}</b><div class="mono" style="color:var(--muted)">${esc(U.usuario)}</div></div><span style="margin-left:auto">${rolPill(U.rol)}</span></div>
   <div><div style="font-size:12.5px;color:var(--muted);margin-bottom:4px">Puedes consultar todo y además:</div>${PERMS.filter(([k])=>can(k)).map(([,l])=>`<div style="padding:3px 0">✓ ${l}</div>`).join('')||'<div>Solo consulta</div>'}</div></div>
-  <div class="mf"><button class="btn" data-act="myPw">Cambiar contraseña</button><button class="btn pri" id="logoutBtn">Cerrar sesión</button></div></div></div>`;
+  <div class="mb" style="grid-template-columns:1fr;padding-top:0"><span class="hint" style="color:var(--muted);font-size:12px">Versión ${APP_VER}</span></div><div class="mf"><button class="btn" data-act="myPw">Cambiar contraseña</button><button class="btn pri" id="logoutBtn">Cerrar sesión</button></div></div></div>`;
   $('#logoutBtn').onclick=logout;
 }
 function pwForm(){
@@ -955,7 +956,10 @@ window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h
   let sid=null;try{sid=localStorage.getItem('cc-sesion')}catch(e){}
   U=S.usuarios.find(z=>z.id===sid&&z.activo!==false)||null;
   render();
-  try{if('serviceWorker' in navigator&&location.protocol.startsWith('http')&&!/claude|anthropic/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+  try{if('serviceWorker' in navigator&&location.protocol.startsWith('http')&&!/claude|anthropic/.test(location.hostname)){
+    const had=!!navigator.serviceWorker.controller;let done=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!done){done=true;location.reload()}});
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update();document.addEventListener('visibilitychange',()=>{if(!document.hidden)r.update()})}).catch(()=>{})}}catch(e){}
 })();
 })();
 </script>
